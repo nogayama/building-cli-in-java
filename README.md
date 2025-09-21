@@ -299,11 +299,13 @@ Java 言語でコマンドラインツールを作りながら、実践的な Ja
     $ mvn archetype:generate \
         -DarchetypeArtifactId=maven-archetype-quickstart \
         -DartifactId=cli_maven_hello \
-        -DgroupId=mypkg \
+        -DgroupId=cli_maven_hello \
+        -Dpackage=mypkg \
         -DinteractiveMode=false
+    
     $ cd cli_maven_hello
     ```
-    
+
     ```sh
     $ tree .
     .
@@ -318,7 +320,7 @@ Java 言語でコマンドラインツールを作りながら、実践的な Ja
                 └── mypkg
                     └── AppTest.java
     ```
-    
+
     
 
 1. **Javaコードを書く**
@@ -366,3 +368,59 @@ Java 言語でコマンドラインツールを作りながら、実践的な Ja
 
 
 
+## 2.4. メインクラスを指定したJarを作成
+
+
+
+1. **フォルダ階層を作る**
+
+    ```sh
+    $ mvn archetype:generate \
+        -DarchetypeArtifactId=maven-archetype-quickstart \
+        -DartifactId=cli_maven_mainjar \
+        -DgroupId=cli_maven_mainjar \
+        -Dpackage=mypkg \
+        -DinteractiveMode=false
+
+    ```
+
+2. **メインクラスを指定するプラグインの項目を`pom.xml`に追加する**
+
+    - `pom.xml`に、`<build>...</build>`要素を挿入する
+      
+        ```xml
+        <project>
+          ...
+          <build>
+            <plugins>
+              <plugin><!-- Main-Class を埋め込んで java -jar で起動可能にする 設定-->
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.4.2</version>
+                <configuration>
+                  <archive>
+                    <manifest>
+                      <mainClass>mypkg.App</mainClass>
+                    </manifest>
+                  </archive>
+                </configuration>
+              </plugin>
+            </plugins> 
+          </build>
+          ...
+        </project>
+        ```
+
+3. **ビルドする**
+
+    ```sh
+    $ mvn package
+    ```
+
+4. **Jarフィアルを実行する**
+
+    ```sh
+    $ java -jar target/cli_maven_mainjar-1.0-SNAPSHOT.jar 
+    Hello world
+    ```
+
+    
