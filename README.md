@@ -550,20 +550,23 @@ Java 言語でコマンドラインツールを作りながら、実践的な Ja
     ```java
     package mypkg;
     
+    import java.util.concurrent.Callable;
+    
     import picocli.CommandLine;
     import picocli.CommandLine.Command;
     import picocli.CommandLine.Option;
     
     @Command(name = "hello", description = "Say hello.", //
     		mixinStandardHelpOptions = true)
-    public class App implements Runnable {
+    public class App implements Callable<Integer> {
     
     	@Option(names = { "-n", "--name" }, defaultValue = "world", description = "Name to greet")
     	protected String name;
     
     	@Override
-    	public void run() {
+    	public Integer call() {
     		System.out.println("Hello " + this.name);
+    		return 0;
     	}
     
     	public static void main(String[] args) {
@@ -571,17 +574,16 @@ Java 言語でコマンドラインツールを作りながら、実践的な Ja
     		System.exit(exitCode);
     	}
     }
-    
     ```
-
+    
     1. 解説(7--9行): `@Command`アノテーションで、このコマンド全体のヘルプを指定
     2. 解説(11-12行): `@Option` アノテーションで、`-n 文字列` の形の入力引数を`name`属性に格納するように指定
-    3. 解説(14-17行): `Runnable`インターフェースのメソッド `run()`を実装する。`execute()`を呼ぶとその中で`run()`が呼ばれるので、実質`execute()`を実装しているのと同じ意味になる。
+    3. 解説(14-17行): `Callable`インターフェースのメソッド `call()`を実装する。`execute()`を呼ぶとその中で`call()`が呼ばれるので、実質`execute()`を実装しているのと同じ意味になる。
     4. 解説(20行): 
         1. `App`インスタンスを`CommandLine`インスタンスに渡す
         2. `CommandLine.execute(string [])`メソッドに、コマンド実行時の入力引数を渡す
         3. 入力引数を解析し、`App`インスタンスの属性に解析後の値をセットする
-        4. `App.run()`を実行する
+        4. `App.call()`を実行する
     
     
     
@@ -590,11 +592,15 @@ Java 言語でコマンドラインツールを作りながら、実践的な Ja
         ```mermaid
         sequenceDiagram
         %%{init: { 'sequence': {'mirrorActors':false} } }%%
-        User->>Java: -n John
-            Java -> App: main(["-n", "John"])
-                App -> new CommandLine: execute(["-n", "John"])
-                     new CommandLine -> new App: .name = "John"
-                     new CommandLine -> new App: run()
+        User ->> Java: -n John
+            Java ->> App: main(["-n", "John"])
+                App ->> new CommandLine: execute(["-n", "John"])
+                     new CommandLine ->> new App: .name = "John"
+                     new CommandLine ->> new App: call()
+                     new App ->> new CommandLine: exit status
+                new CommandLine ->> App: exit status
+            App ->> Java: exit status
+        Java ->> User: exit status
         
         ```
 
