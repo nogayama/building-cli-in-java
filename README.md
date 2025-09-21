@@ -587,7 +587,9 @@ Java 言語でコマンドラインツールを作りながら、実践的な Ja
     
     - シーケンス図にすると以下のようになる
     
-        ```sequence
+        ```mermaid
+        sequenceDiagram
+        %%{init: { 'sequence': {'mirrorActors':false} } }%%
         User->>Java: -n John
             Java -> App: main(["-n", "John"])
                 App -> new CommandLine: execute(["-n", "John"])
