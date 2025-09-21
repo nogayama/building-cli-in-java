@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+THIS_DIR="$(cd $(dirname $0);pwd)" #=> このシェルスクリプトが存在しているフォルダの絶対パス
+export CLASSPATH="${THIS_DIR}/../bin" #=> 一つ上を経由したbinフォルダのパスをクラスパスに追加
+java mypkg.App "$@" # このシェルスクリプトの入力引数をJavaアプリに渡す
