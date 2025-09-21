@@ -77,7 +77,9 @@ Java 言語でコマンドラインツールを作りながら、実践的な Ja
         ```sh
         $ echo 'export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"' >> ~/.zshrc
         ```
-    
+
+
+
 3. **動作確認**
    
     1. 普段利用するユーザーとしてログイン
@@ -117,7 +119,9 @@ Java 言語でコマンドラインツールを作りながら、実践的な Ja
     $ mkdir -p bin
     $ mkdir -p src/mypkg
     ```
-    
+
+
+
 2. **Javaコードを書く**
 
     `src/mypkg/App.java`を編集する
@@ -131,7 +135,9 @@ Java 言語でコマンドラインツールを作りながら、実践的な Ja
     	}
     }
     ```
-    
+
+
+
 3. **コンパイルする**
     クラスファイルの出力先として、`bin`フォルダを指定する。
 
@@ -150,14 +156,18 @@ Java 言語でコマンドラインツールを作りながら、実践的な Ja
         └── mypkg
             └── App.java
     ```
-    
+
+
+
 4. **実行する**
 
     ```sh
     $ java -classpath bin mypkg.App
     Hello world
     ```
-    
+
+
+
 5. **クラスパスを環境変数に指定して実行する**
 
     ```sh
@@ -165,7 +175,9 @@ Java 言語でコマンドラインツールを作りながら、実践的な Ja
     $ java mypkg.App
     Hello world
     ```
-    
+
+
+
 6. **シェルスクリプトから実行する**
    
     1. シェルスクリプトフォルダ`sh`を作る
@@ -194,7 +206,9 @@ Java 言語でコマンドラインツールを作りながら、実践的な Ja
         Hello world
         ```
 
-7. メインクラス指定無しのjarファイルを作成して実行
+
+
+7. **メインクラス指定無しのjarファイルを作成して実行**
 
     1. **Jarをビルドする**
 
@@ -208,10 +222,12 @@ Java 言語でコマンドラインツールを作りながら、実践的な Ja
        `jar`ファイルをクラスパスに追加して、`java`コマンドから実行できる
 
         ```sh
-        $ java -cp hello_jar.jar mypkg.App 
+        $ java -cp hello_jar.jar mypkg.App
         ```
 
-8. メインクラスを指定するjarファイルを作成して実行
+
+
+8. **メインクラスを指定するjarファイルを作成して実行**
 
     1. **Jarをビルドする**
 
@@ -372,6 +388,14 @@ Java 言語でコマンドラインツールを作りながら、実践的な Ja
 
 
 
+- サンプルコード [maven_mainjar](https://github.com/nogayama/building_cli_in_java/tree/maven_mainjar) は以下のコマンドで取得できる。
+
+    ```sh
+    $ git clone git@github.com:nogayama/building_cli_in_java.git -b maven_mainjar cli_maven_mainjar
+    ```
+
+
+
 1. **フォルダ階層を作る**
 
     ```sh
@@ -381,8 +405,9 @@ Java 言語でコマンドラインツールを作りながら、実践的な Ja
         -DgroupId=cli_maven_mainjar \
         -Dpackage=mypkg \
         -DinteractiveMode=false
-
     ```
+
+
 
 2. **メインクラスを指定するプラグインの項目を`pom.xml`に追加する**
 
@@ -410,13 +435,17 @@ Java 言語でコマンドラインツールを作りながら、実践的な Ja
         </project>
         ```
 
+
+
 3. **ビルドする**
 
     ```sh
     $ mvn package
     ```
 
-4. **Jarフィアルを実行する**
+
+
+4. **Jarファイルを実行する**
 
     ```sh
     $ java -jar target/cli_maven_mainjar-1.0-SNAPSHOT.jar 
@@ -424,3 +453,171 @@ Java 言語でコマンドラインツールを作りながら、実践的な Ja
     ```
 
     
+
+# 3. 入力引数を解析するパッケージ(PicoCli)を使う
+
+
+
+## 3.1. 依存パッケージを取り込み、Jarファイルに同梱する
+
+
+
+- サンプルコード [picocli_hello](https://github.com/nogayama/building_cli_in_java/tree/picocli_hello) は以下のコマンドで取得できる。
+
+    ```sh
+    $ git clone git@github.com:nogayama/building_cli_in_java.git -b picocli_hello cli_picocli_hello
+    ```
+
+
+
+1. **フォルダ階層を作る**
+
+    ```sh
+     mvn archetype:generate \
+        -DarchetypeArtifactId=maven-archetype-quickstart \
+        -DartifactId=cli_picocli_hello \
+        -DgroupId=cli_picocli_hello \
+        -Dpackage=mypkg \
+        -DinteractiveMode=false
+    ```
+
+
+
+2. **依存パッケージとして、`picocli`を指定する**
+
+    - `pom.xml`に、`<dependency>...</dependency>`要素を挿入する
+
+        ```xml
+        <project ...
+          <dependencies>
+            ...
+            <dependency>
+              <groupId>info.picocli</groupId>
+              <artifactId>picocli</artifactId>
+              <version>4.7.6</version>
+            </dependency>
+            ...
+          </dependencies>
+        
+        </project>
+        ```
+
+
+
+4. **実行可能なJarファイルを作成し依存パッケージを同梱するように指定する**
+   
+
+    - `pom.xml`に、`<build>...</build>`要素を挿入する
+
+        ```xml
+        <project 
+          ...
+          <build>
+            <plugins>
+              <plugin><!-- 実行可能 jar を作る -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.5.0</version>
+                <executions>
+                  <execution>
+                    <phase>package</phase>
+                    <goals>
+                      <goal>shade</goal>
+                    </goals>
+                    <configuration>
+                      <transformers>
+                        <!-- Main-Class を jar の MANIFEST に書き込む -->
+                        <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                          <mainClass>mypkg.App</mainClass>
+                        </transformer>
+                      </transformers>
+                    </configuration>
+                  </execution>
+                </executions>
+              </plugin>
+            </plugins>
+          </build>
+          ...
+        </project>
+        ```
+
+
+
+5. **Java コードを書く**
+
+    `src/main/java/mypkg/App.java`を編集する
+
+    ```java
+    package mypkg;
+    
+    import picocli.CommandLine;
+    import picocli.CommandLine.Command;
+    import picocli.CommandLine.Option;
+    
+    @Command(name = "hello", description = "Say hello.", //
+    		mixinStandardHelpOptions = true)
+    public class App implements Runnable {
+    
+    	@Option(names = { "-n", "--name" }, defaultValue = "world", description = "Name to greet")
+    	protected String name;
+    
+    	@Override
+    	public void run() {
+    		System.out.println("Hello " + this.name);
+    	}
+    
+    	public static void main(String[] args) {
+    		int exitCode = new CommandLine(new App()).execute(args);
+    		System.exit(exitCode);
+    	}
+    }
+    
+    ```
+
+    1. 解説(7--9行): `@Command`アノテーションで、このコマンド全体のヘルプを指定
+    2. 解説(11-12行): `@Option` アノテーションで、`-n 文字列` の形の入力引数を`name`属性に格納するように指定
+    3. 解説(14-17行): `Runnable`インターフェースのメソッド `run()`を実装する。`execute()`を呼ぶとその中で`run()`が呼ばれるので、実質`execute()`を実装しているのと同じ意味になる。
+    4. 解説(20行): 
+        1. `App`インスタンスを`CommandLine`インスタンスに渡す
+        2. `CommandLine.execute(string [])`メソッドに、コマンド実行時の入力引数を渡す
+        3. 入力引数を解析し、`App`インスタンスの属性に解析後の値をセットする
+        4. `App.run()`を実行する
+    
+    
+    
+    - シーケンス図にすると以下のようになる
+    
+        ```sequence
+        User->>Java: -n John
+            Java -> App: main(["-n", "John"])
+                App -> new CommandLine: execute(["-n", "John"])
+                     new CommandLine -> new App: .name = "John"
+                     new CommandLine -> new App: run()
+        
+        ```
+
+
+
+
+6. **ビルドする**
+
+    ```sh
+    $ mvn package
+    ```
+
+
+
+7. **Jarファイルを実行する**
+
+    ```sh
+    $ java -jar target/cli_picocli_hello-1.0-SNAPSHOT.jar -n John 
+    Hello John
+    ```
+    
+    ```sh
+    $ java -cp target/cli_picocli_hello-1.0-SNAPSHOT.jar mypkg.App -n John
+    Hello John
+    ```
+    
+    
+
