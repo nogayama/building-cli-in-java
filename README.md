@@ -8,11 +8,11 @@ Java 言語でコマンドラインツールを作りながら、実践的な Ja
 
 [TOC]
 
-# 1. Java
+# 1. Introduction to Java 
 
 
 
-## 1.1. Setup for system
+## 1.1. セットアップ(システム)
 
 
 
@@ -24,6 +24,8 @@ Java 言語でコマンドラインツールを作りながら、実践的な Ja
         $ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
         ```
 
+    
+
 2. **Javaをインストール**
 
     1. 管理者権限があるユーザーとしてログイン
@@ -34,9 +36,21 @@ Java 言語でコマンドラインツールを作りながら、実践的な Ja
 
 
 
-## 1.2. Setup for user
+## 1.2. セットアップ(ユーザー環境)
 
 
+
+1. **環境変数PATHにBrewを追加する**
+
+    1. 普段利用するユーザーとしてログイン
+
+    2. 起動スクリプトに環境変数の宣言を追加する
+
+        ```sh
+        $ echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zshrc
+        ```
+
+    
 
 1. **環境変数JAVA_HOMEにjavaのフォルダを追加**
 
@@ -50,6 +64,8 @@ Java 言語でコマンドラインツールを作りながら、実践的な Ja
         $ echo 'export JAVA_HOME="/opt/homebrew/opt/openjdk"' >> ~/.zshrc
         ```
 
+    
+
 2. **環境変数PATHにjavaコマンドが存在するフォルダを追加**
 
     1. 普段利用するユーザーとしてログイン
@@ -61,7 +77,9 @@ Java 言語でコマンドラインツールを作りながら、実践的な Ja
         ```sh
         $ echo 'export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"' >> ~/.zshrc
         ```
+    
 3. **動作確認**
+   
     1. 普段利用するユーザーとしてログイン
     2. バージョンを表示
         ```sh
@@ -71,26 +89,39 @@ Java 言語でコマンドラインツールを作りながら、実践的な Ja
 
 
 
-## 1.3. Hello Java アプリを開発
+## 1.3. Java アプリを開発
+
+
+
+- サンプルコード [java_hello](https://github.com/nogayama/building_cli_in_java/tree/java_hello) は以下のコマンドで取得できる。
+
+    ```sh
+    $ git clone git@github.com:nogayama/building_cli_in_java.git -b java_hello cli_java_hello
+    ```
+
 
 
 
 1. **以下のフォルダ階層を作る**
-     ```
+   
+    ```
+    cli_java_hello
     ├── bin
     └── src
         └── mypkg
             └── App.java
     ```
     ```sh
+    $ mkdir cli_java_hello
+    $ cd cli_java_hello
     $ mkdir -p bin
     $ mkdir -p src/mypkg
     ```
     
 2. **Javaコードを書く**
-   
+
     `src/mypkg/App.java`を編集する
-    
+
     ```java
     package mypkg;
     
@@ -103,6 +134,7 @@ Java 言語でコマンドラインツールを作りながら、実践的な Ja
     
 3. **コンパイルする**
     クラスファイルの出力先として、`bin`フォルダを指定する。
+
     ```sh
     $ javac src/**/*.java -d bin 
     ```
@@ -125,51 +157,212 @@ Java 言語でコマンドラインツールを作りながら、実践的な Ja
     $ java -classpath bin mypkg.App
     Hello world
     ```
-
+    
 5. **クラスパスを環境変数に指定して実行する**
-   
+
     ```sh
     $ export CLASSPATH=bin
     $ java mypkg.App
     Hello world
     ```
-
+    
 6. **シェルスクリプトから実行する**
-
+   
     1. シェルスクリプトフォルダ`sh`を作る
         ```sh
         $ mkdir sh
         ```
         
     1. テキストエディタで `sh/app` を作成する
-        
+       
         ```sh
         #!/usr/bin/env bash
         THIS_DIR="$(cd $(dirname $0);pwd)" #=> このシェルスクリプトが存在しているフォルダの絶対パス
         export CLASSPATH="${THIS_DIR}/../bin" #=> 一つ上を経由したbinフォルダのパスをクラスパスに追加
         java mypkg.App "$@" # このシェルスクリプトの入力引数をJavaアプリに渡す
         ```
-    
+
     2. 実行可能ファイルにする
         ```sh
         $ chmod +x sh/app
         ```
-    
+
     3. 実行する
-    
+
         ```sh
         $ ./sh/app
         Hello world
         ```
-    
-        
 
-- サンプルコード
+7. メインクラス指定無しのjarファイルを作成して実行
 
-    - [java_hello ブランチ](https://github.com/nogayama/building_cli_in_java/tree/java_hello)
+    1. **Jarをビルドする**
 
         ```sh
-        $ git clone git@github.com:nogayama/building_cli_in_java.git -b java_hello cli_java_hello
+        $ jar --create --file hello_jar.jar -C bin . 
+        $ ls 
+        hello_jar.jar
         ```
 
-        
+    2. **実行する**
+       `jar`ファイルをクラスパスに追加して、`java`コマンドから実行できる
+
+        ```sh
+        $ java -cp hello_jar.jar mypkg.App 
+        ```
+
+8. メインクラスを指定するjarファイルを作成して実行
+
+    1. **Jarをビルドする**
+
+        ```sh
+        $ jar --create --file hello_jar.jar --main-class mypkg.App  -C bin . 
+        $ ls 
+        hello_jar.jar
+        ```
+
+    2. **実行する**
+       `-jar FILE`オプションを指定し、`java`コマンドからメインクラスを実行できる
+
+        ```sh
+        $ java -jar hello_jar.jar
+        ```
+
+
+
+
+# 2. Introduction to Maven
+
+
+
+- サンプルコード [maven_hello](https://github.com/nogayama/building_cli_in_java/tree/maven_hello) は以下のコマンドで取得できる。
+
+    ```sh
+    $ git clone git@github.com:nogayama/building_cli_in_java.git -b maven_hello cli_maven_hello
+    ```
+
+
+
+## 2.1. セットアップ(システム)
+
+
+
+1. **Mavenをインストール**
+
+    1. 管理者権限があるユーザーとしてログイン
+    1. `maven`をインストール
+    ```sh
+    $ brew install maven
+    ```
+
+
+
+## 2.2. セットアップ(ユーザー環境)
+
+
+
+1. **環境変数PATHにBrewを追加する**
+
+    1. 普段利用するユーザーとしてログイン
+    2. `mvn` が実行可能か調べる
+
+        ```sh
+        $ command -v mvn
+        /opt/homebrew/bin/mvn
+        ```
+    2. 無ければ、起動スクリプトに環境変数の宣言を追加する
+
+        ```sh
+        $ echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zshrc
+        ```
+
+
+
+1. **動作確認**
+
+    1. 普段利用するユーザーとしてログイン
+    2. バージョンを表示
+        ```sh
+        $ mvn --version
+        Apache Maven 3.9.11 (3e54c93a704957b63ee3494413a2b544fd3d825b)
+        ```
+
+
+
+## 2.3. Java アプリを開発
+
+
+
+1. **フォルダ階層を作る**
+
+    ```sh
+    $ mvn archetype:generate \
+        -DarchetypeArtifactId=maven-archetype-quickstart \
+        -DartifactId=cli_maven_hello \
+        -DgroupId=mypkg \
+        -DinteractiveMode=false
+    $ cd cli_maven_hello
+    ```
+    
+    ```sh
+    $ tree .
+    .
+    ├── pom.xml
+    └── src
+        ├── main
+        │   └── java
+        │       └── mypkg
+        │           └── App.java
+        └── test
+            └── java
+                └── mypkg
+                    └── AppTest.java
+    ```
+    
+    
+
+1. **Javaコードを書く**
+
+    `src/main/java/mypkg/App.java`を編集する
+
+    ```java
+    package mypkg;
+    
+    public class App {
+    	public static void main(String[] args) {
+    		System.out.println("Hello world");
+    	}
+    }
+    ```
+
+
+
+1. **ビルドする**
+   
+    ```sh
+    $ mvn package
+    ```
+    
+    `jar`ファイルができる
+    
+    ```sh
+    $ tree target -L 1
+    target
+    ...
+    ├── cli_maven_hello-1.0-SNAPSHOT.jar
+    ...
+    ```
+    
+    
+    
+1. **Jarファイルを実行する**
+
+    ```sh
+    $ java -cp target/cli_maven_hello-1.0-SNAPSHOT.jar mypkg.App
+    Hello world
+    ```
+
+
+
+
+
