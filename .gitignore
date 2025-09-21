@@ -35,3 +35,6 @@ replay_pid*
 
 # maven
 /target
+
+# maven-shade-plugin
+dependency-reduced-pom.xml
