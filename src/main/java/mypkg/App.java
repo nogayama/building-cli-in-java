@@ -1,19 +1,22 @@
 package mypkg;
 
+import java.util.concurrent.Callable;
+
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
 @Command(name = "hello", description = "Say hello.", //
 		mixinStandardHelpOptions = true)
-public class App implements Runnable {
+public class App implements Callable<Integer> {
 
 	@Option(names = { "-n", "--name" }, defaultValue = "world", description = "Name to greet")
 	protected String name;
 
 	@Override
-	public void run() {
+	public Integer call() {
 		System.out.println("Hello " + this.name);
+		return 0;
 	}
 
 	public static void main(String[] args) {
