@@ -1,3 +1,4 @@
+/bin/
 
 # Compiled class file
 *.class
@@ -27,3 +28,7 @@ replay_pid*
 # eclipse
 .classpath
 .project
+.settings
+
+# Mac OS
+.DS_Store
